@@ -1,7 +1,7 @@
 /*	Author: jwang592
  *  Partner(s) Name: Justin Wang
  *	Lab Section:
- *	Assignment: Lab #  Exercise #
+ *	Assignment: Lab 2  Exercise 2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -15,7 +15,7 @@
 int main(void) {
     	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
 	DDRC = 0xFF; PORTC = 0x00; // Configure port C's 8 pins as outputs, initialize to 0s
-	unsigned char cntavail = 0x00; // Temporary variable to hold the value of B
+	unsigned char cntavail = 0x00; // Temporary variable to hold the number of available spaces
 	unsigned char tmpA = 0x00; // Temporary variable to hold the value of A
 
 
@@ -24,16 +24,16 @@ int main(void) {
 		tmpA = PINA & 0x0F;
 
 
-		if(!((tmpA & 0x01) && 0x01)) {
+		if(!((tmpA & 0x01) && 0x01)) { // Check if A0 is available
 			cntavail+=1;
 		}
-		if(!((tmpA & 0x02) && 0x01)) {
+		if(!((tmpA & 0x02) && 0x01)) { // Check if A1 is available
                         cntavail+=1;
                 }
-		if(!((tmpA & 0x04) && 0x01)) {
+		if(!((tmpA & 0x04) && 0x01)) { // Check if A2 is available
                         cntavail+=1;
                 }
-		if(!((tmpA & 0x08) && 0x01)) {
+		if(!((tmpA & 0x08) && 0x01)) { // Check if A3 is available
                         cntavail+=1;
                 }	
 		PORTC = cntavail;
