@@ -27,19 +27,19 @@ int main(void) {
 
 
 		if(!((tmpA & 0x01) && 0x01)) {
-			tmpC = tmpC | 0x01; // Set C0 to 1 for available spot
+	
 			cntavail+=1;
 		}
 		if(!((tmpA & 0x02) && 0x01)) {
-			tmpC = tmpC | 0x02; // Set C1 to 1 for available spot
+			
                         cntavail+=1;
                 }
 		if(!((tmpA & 0x04) && 0x01)) {
-			tmpC = tmpC | 0x04; // Set C2 to 1 for available spot
+			
                         cntavail+=1;
                 }
 		if(!((tmpA & 0x08) && 0x01)) {
-			tmpC = tmpC | 0x08; // Set C3 to 1 for available spot
+			
                         cntavail+=1;
                 }
 		if(cntavail ==  0){
