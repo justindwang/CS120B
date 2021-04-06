@@ -1,7 +1,7 @@
 /*	Author: jwang592
  *  Partner(s) Name: Justin Wang
  *	Lab Section:
- *	Assignment: Lab #  Exercise #
+ *	Assignment: Lab 2  Exercise 1
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -23,7 +23,7 @@ int main(void) {
 		tmpA = PINA & 0x03;
 
 
-		if(tmpA == 0x01) {
+		if(tmpA == 0x01) { // Check if A1A0 is 01
 			tmpB = 0x01;
 		}
 		else {
