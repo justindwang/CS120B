@@ -42,10 +42,10 @@ int main(void) {
 			
                         cntavail+=1;
                 }
+		PORTC = cntavail;
 		if(cntavail ==  0){
-			tmpC = 0x80; // Set C7 to 1 if no spots were available
-		}	
-		PORTC = tmpC;
+			PORTC = 0x80; // Set C7 to 1 if no spots were available
+		}
 
 	}
 	return 0;
