@@ -1,7 +1,7 @@
 /*	Author: jwang592
  *  Partner(s) Name: Justin Wang
  *	Lab Section:
- *	Assignment: Lab #  Exercise #
+ *	Assignment: Lab 2  Exercise 3
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -27,23 +27,23 @@ int main(void) {
 
 
 		if(!((tmpA & 0x01) && 0x01)) {
-			tmpC = tmpC | 0x01;
+			tmpC = tmpC | 0x01; // Set C0 to 1 for available spot
 			cntavail+=1;
 		}
 		if(!((tmpA & 0x02) && 0x01)) {
-			tmpC = tmpC | 0x02;
+			tmpC = tmpC | 0x02; // Set C1 to 1 for available spot
                         cntavail+=1;
                 }
 		if(!((tmpA & 0x04) && 0x01)) {
-			tmpC = tmpC | 0x04;
+			tmpC = tmpC | 0x04; // Set C2 to 1 for available spot
                         cntavail+=1;
                 }
 		if(!((tmpA & 0x08) && 0x01)) {
-			tmpC = tmpC | 0x08;
+			tmpC = tmpC | 0x08; // Set C3 to 1 for available spot
                         cntavail+=1;
                 }
 		if(cntavail ==  0){
-			tmpC = 0x80;
+			tmpC = 0x80; // Set C7 to 1 if no spots were available
 		}	
 		PORTC = tmpC;
 

@@ -1,4 +1,4 @@
-# Array of tests to run (in order)
+# Array of tests to run (in order) 
 # Each test contains
 #   description - 
 #   steps - A list of steps to perform, each step can have
