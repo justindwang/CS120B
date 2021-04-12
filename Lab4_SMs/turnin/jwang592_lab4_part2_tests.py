@@ -27,11 +27,7 @@ tests = [{'description': 'PINA: 0x00, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00=> PORTC
 	{'description': 'PINA: 0x03 => PORTC: 0x00, state: reset',
 	'steps': [{'inputs': [('PINA', 0x03)], 'iterations': 1}],
 	'expected': [('PORTC',0x00)],
-	},
- 	]
-
-watch = ['state']
-
+	},]
 
 watch = ['state']
 
