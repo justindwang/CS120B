@@ -12,54 +12,57 @@
 #include "simAVRHeader.h"
 #endif
 
-enum states {START, INC, DEC, RESET, WAIT_CHANGE} state;
-unsigned char count = 0x00;
-unsigned char last_state = 0x00; // 1 for inc, 2 for dec, 0 for reset
+enum states {START, LOCKED, WAIT_Y, UNLOCKED, CHECKRELEASE} state;
+unsigned char X = 0x00;
+unsigned char Y = 0x00;
+unsigned char pound = 0x00;
+unsigned char tmpA7 = 0x00;
+unsigned char tmpB = 0x00;
+unsigned char already_pressed = 0x00;
 
 void tick(void){
+	X = PINA & 0x01;
+	Y = PINA & 0x02;
+	pound = PINA & 0x04;
+	tmpA7 = PINA & 0x80;
+
 	switch(state){
 		case START:
-			if(PINA == 3){
-				state = RESET;}
-			else if(PINA == 1){
-				state = INC;}
-			else if(PINA == 2){
-				state = DEC;}
+			state = LOCKED;
+			break;
+		case LOCKED:
+			if(X || Y || tmpA7){
+				state = LOCKED;}
+			else if(pound && !Y){
+				state = CHECKRELEASE;}
 			else{
-				state = START;}
+				state = LOCKED;}
 			break;
-		case INC:
-			state = WAIT_CHANGE;
-			break;
-		case DEC:
-			state = WAIT_CHANGE;
-			break;
-		case RESET:
-            if(PINA == 1){
-                state = INC;
-            }
-            else if(PINA == 2){
-                state = DEC;
-            }
-            else{
-			    state = WAIT_CHANGE;}
-			break;
-		case WAIT_CHANGE:
-			if(PINA == 3){
-				state = RESET;
-			}
-			else if(PINA == 0){
-				state = START;
-			}
-			else if(last_state == 1 && PINA == 2){
-				state = DEC;
-			}
-			else if(last_state == 2 && PINA == 1){
-				state = INC;
-			}
+		case CHECKRELEASE:
+			if(PINA == 0){
+				state = WAIT_Y;}
 			else{
-				state = WAIT_CHANGE;
+				state = LOCKED;
 			}
+		case WAIT_Y:
+			if(X || tmpA7){
+				state = LOCKED;}
+			else if(Y && pound){
+				state = LOCKED;}
+			else if (!Y && pound){
+				state = WAIT_Y;}
+			else if(!Y && !pound){
+				state = WAIT_Y;}
+			else if(Y && !pound){
+				state = UNLOCKED;}
+			else{
+				state = LOCKED;}
+			break;
+		case UNLOCKED:
+			if(tmpA7){
+				state = LOCKED;}
+			else{
+				state = UNLOCKED;}
 			break;
 		default:
 			break;
@@ -67,21 +70,15 @@ void tick(void){
 	switch(state){
 		case START:
 			break;
-		case INC:
-			if (count < 9){
-				count = count + 1;}
-			last_state = 1;
+		case LOCKED:
+			tmpB = 0;
 			break;
-		case DEC:
-			if (count > 0){
-				count = count - 1;}
-			last_state = 2;
+		case CHECKRELEASE:
 			break;
-		case RESET:
-			count = 0x00;
-			last_state = 0;
+		case WAIT_Y:
 			break;
-		case WAIT_CHANGE:
+		case UNLOCKED:
+			tmpB = 1;
 			break;
 		default:
 			break;
@@ -90,12 +87,11 @@ void tick(void){
 
 int main(void){
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRC = 0xFF; PORTC = 0x00;
+	DDRB = 0xFF; PORTB = 0x00;
 	state = START;
-	count = 0x07;
 	while(1){
 		tick();
-		PORTC = count;
+		PORTB = tmpB;
 	}
 	return 0;
 }
