@@ -12,13 +12,12 @@
 #include "simAVRHeader.h"
 #endif
 
-enum states {START, LOCKED, WAIT_Y, UNLOCKED, CHECKRELEASE} state;
+enum states {LOCKED, WAIT_Y, UNLOCKED, PERM_LOCKED} state;
 unsigned char X = 0x00;
 unsigned char Y = 0x00;
 unsigned char pound = 0x00;
 unsigned char tmpA7 = 0x00;
 unsigned char tmpB = 0x00;
-unsigned char already_pressed = 0x00;
 
 void tick(void){
 	X = PINA & 0x01;
@@ -27,23 +26,14 @@ void tick(void){
 	tmpA7 = PINA & 0x80;
 
 	switch(state){
-		case START:
-			state = LOCKED;
-			break;
 		case LOCKED:
 			if(X || Y || tmpA7){
 				state = LOCKED;}
 			else if(pound && !Y){
-				state = CHECKRELEASE;}
+				state = WAIT_Y;}
 			else{
 				state = LOCKED;}
 			break;
-		case CHECKRELEASE:
-			if(PINA == 0){
-				state = WAIT_Y;}
-			else{
-				state = LOCKED;
-			}
 		case WAIT_Y:
 			if(X || tmpA7){
 				state = LOCKED;}
@@ -59,27 +49,28 @@ void tick(void){
 				state = LOCKED;}
 			break;
 		case UNLOCKED:
-			if(tmpA7){
-				state = LOCKED;}
+			if(tmpA7 || Y){
+				state = PERM_LOCKED;}
 			else{
 				state = UNLOCKED;}
+			break;
+		case PERM_LOCKED:
+			state = PERM_LOCKED;
 			break;
 		default:
 			break;
 	}
 	switch(state){
-		case START:
-			break;
 		case LOCKED:
 			tmpB = 0;
-			break;
-		case CHECKRELEASE:
 			break;
 		case WAIT_Y:
 			break;
 		case UNLOCKED:
 			tmpB = 1;
 			break;
+		case PERM_LOCKED:
+			tmpB = 0;
 		default:
 			break;
 	}
@@ -88,7 +79,7 @@ void tick(void){
 int main(void){
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
-	state = START;
+	state = LOCKED;
 	while(1){
 		tick();
 		PORTB = tmpB;
