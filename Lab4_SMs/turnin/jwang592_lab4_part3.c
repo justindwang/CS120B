@@ -12,7 +12,7 @@
 #include "simAVRHeader.h"
 #endif
 
-enum states {START, LOCKED, WAIT_Y, UNLOCKED, CHECKRELEASE} state;
+enum states {START, LOCKED, WAIT_Y, UNLOCKED, WAIT_RELEASE} state;
 unsigned char X = 0x00;
 unsigned char Y = 0x00;
 unsigned char pound = 0x00;
@@ -34,16 +34,17 @@ void tick(void){
 			if(X || Y || tmpA7){
 				state = LOCKED;}
 			else if(pound && !Y){
-				state = CHECKRELEASE;}
+				state = WAIT_RELEASE;}
 			else{
 				state = LOCKED;}
 			break;
-		case CHECKRELEASE:
-			if(PINA == 0){
+		case WAIT_RELEASE:
+			if(PINA == 0x00){
 				state = WAIT_Y;}
 			else{
 				state = LOCKED;
 			}
+			break;
 		case WAIT_Y:
 			if(X || tmpA7){
 				state = LOCKED;}
@@ -73,7 +74,7 @@ void tick(void){
 		case LOCKED:
 			tmpB = 0;
 			break;
-		case CHECKRELEASE:
+		case WAIT_RELEASE:
 			break;
 		case WAIT_Y:
 			break;
