@@ -39,10 +39,10 @@ void tick(void){
 				state = LOCKED;}
 			break;
 		case WAIT_RELEASE:
-			if(PINA == 0x00){
-				state = WAIT_Y;}
+			if(PINA == 0x02){
+				state = LOCKED;}
 			else{
-				state = LOCKED;
+				state = WAIT_Y;
 			}
 			break;
 		case WAIT_Y:
