@@ -29,13 +29,35 @@ void tick(void){
 				state = START;}
 			break;
 		case INC:
-			state = WAIT_CHANGE;
+			if(PINA == 0){
+				state = START;}
+			else if(PINA == 2){
+				state = DEC;}
+			else if(PINA == 3){
+				state = RESET;}
+			else{
+				state = WAIT_CHANGE;}
 			break;
 		case DEC:
-			state = WAIT_CHANGE;
+			if(PINA == 0){
+				state = START;}
+			else if (PINA == 1){
+				state = INC;}
+			else if (PINA == 3){
+				state = RESET;}
+			else{
+				state = WAIT_CHANGE;}
 			break;
 		case RESET:
-			state = WAIT_CHANGE;
+			if(PINA == 0){
+				state = START;}
+            		if(PINA == 1){
+                		state = INC;}
+           		else if(PINA == 2){
+                		state = DEC;
+           			 }
+            		else{
+			    state = WAIT_CHANGE;}
 			break;
 		case WAIT_CHANGE:
 			if(PINA == 3){
