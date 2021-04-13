@@ -22,7 +22,7 @@ void tick(void){
 			if(PINA == 3){
 				state = RESET;}
 			else if(PINA == 1){
-				state = DEC;}
+				state = INC;}
 			else if(PINA == 2){
 				state = DEC;}
 			else{

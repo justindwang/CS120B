@@ -12,47 +12,83 @@
 #include "simAVRHeader.h"
 #endif
 
+enum states {START, INC, DEC, RESET, WAIT_CHANGE} state;
+unsigned char count = 0x00;
+unsigned char last_state = 0x00; // 1 for inc, 2 for dec, 0 for reset
+
+void tick(void){
+	switch(state){
+		case START:
+			if(PINA == 3){
+				state = RESET;}
+			else if(PINA == 1){
+				state = INC;}
+			else if(PINA == 2){
+				state = DEC;}
+			else{
+				state = START;}
+			break;
+		case INC:
+			state = WAIT_CHANGE;
+			break;
+		case DEC:
+			state = WAIT_CHANGE;
+			break;
+		case RESET:
+			state = WAIT_CHANGE;
+			break;
+		case WAIT_CHANGE:
+			if(PINA == 3){
+				state = RESET;
+			}
+			else if(PINA == 0){
+				state = START;
+			}
+			else if(last_state == 1 && PINA == 2){
+				state = DEC;
+			}
+			else if(last_state == 2 && PINA == 1){
+				state = INC;
+			}
+			else{
+				state = WAIT_CHANGE;
+			}
+			break;
+		default:
+			break;
+	}
+	switch(state){
+		case START:
+			break;
+		case INC:
+			if (count < 9){
+				count = count + 1;}
+			last_state = 1;
+			break;
+		case DEC:
+			if (count > 0){
+				count = count - 1;}
+			last_state = 2;
+			break;
+		case RESET:
+			count = 0x00;
+			last_state = 0;
+			break;
+		case WAIT_CHANGE:
+			break;
+		default:
+			break;
+	}
+}
+
 int main(void){
-	enum states {START, WAIT, SWITCH} state;
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRB = 0xFF; PORTB = 0x00;
+	DDRC = 0xFF; PORTC = 0x00;
 	state = START;
-	PORTB = 0x01;
+	count = 0x07;
 	while(1){
-		switch(state){
-			case START:
-				if((PINA & 0x01) && 0x01){
-					PORTB = 0x02;
-					state = WAIT;}
-				else{
-					state = START;}
-				break;
-			case WAIT:
-				if(!PINA){
-					state = SWITCH;}
-				else{
-					state = WAIT;}
-				break;
-			case SWITCH:
-				if((PINA & 0x01) && 0x01){
-					PORTB = 0x01;
-					state = WAIT;}
-				else{
-					state = SWITCH;}
-				break;
-		}
-		// switch(state){
-		// 	case START:
-		// 		PORTB = 0x01;
-		// 		break;
-		// 	case WAIT0:
-		// 		break;
-		// 	case SWITCH:
-		// 		PORTB = 0x02;
-		// 		break;
-		// 	case WAIT1:
-		// 		break;
-		// }
+		tick();
+		PORTC = count;
 	}
 	return 0;
 }
