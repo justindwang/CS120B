@@ -12,8 +12,9 @@
 #include "simAVRHeader.h"
 #endif
 
-enum states {START, INC, DEC, RESET} state;
+enum states {START, INC, DEC, RESET, WAIT_CHANGE} state;
 unsigned char count = 0x00;
+unsigned char last_state = 0x00; // 0 for reset, 1 for inc, 2 for dec
 
 void tick(void){
 	switch(state){
@@ -28,13 +29,33 @@ void tick(void){
 				state = START;}
 			break;
 		case INC:
-			state = START;
+			state = WAIT_CHANGE;
 			break;
 		case DEC:
-			state = START;
+			state = WAIT_CHANGE;
 			break;
 		case RESET:
-			state = START;
+			state = WAIT_CHANGE;
+			break;
+		case WAIT_CHANGE:
+			if(last_state == 0){
+				if(PINA == 1 || PINA == 2){
+					state = START;
+				}
+			}
+			else if(last_state == 1){
+				if(PINA == 0 || PINA == 2){
+					state = START;
+				}
+			}
+			else if(last_state == 2){
+				if(PINA == 0 || PINA == 1){
+					state = START;
+				}
+			}
+			else{
+				state = WAIT_CHANGE;
+			}
 			break;
 		default:
 			break;
@@ -45,13 +66,18 @@ void tick(void){
 		case INC:
 			if (count < 9){
 				count = count + 1;}
+			last_state = 1;
 			break;
 		case DEC:
 			if (count > 0){
 				count = count - 1;}
+			last_state = 2;
 			break;
 		case RESET:
 			count = 0x00;
+			last_state = 0;
+			break;
+		case WAIT_CHANGE:
 			break;
 		default:
 			break;
