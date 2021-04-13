@@ -40,6 +40,8 @@ void tick(void){
 		case WAIT_Y:
 			if(X || tmpA7){
 				state = LOCKED;}
+			else if(pound && Y){
+				state = LOCKED;}
 			else if(!pound && Y){
 				state = UNLOCKED;}
 			else if(pound && !Y){
