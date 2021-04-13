@@ -14,7 +14,7 @@
 
 enum states {START, INC, DEC, RESET, WAIT_CHANGE} state;
 unsigned char count = 0x00;
-unsigned char last_state = 0x00; // 0 for reset, 1 for inc, 2 for dec
+unsigned char last_state = 0x00; // 1 for inc, 2 for dec, 0 for reset
 
 void tick(void){
 	switch(state){
@@ -22,7 +22,7 @@ void tick(void){
 			if(PINA == 3){
 				state = RESET;}
 			else if(PINA == 1){
-				state = INC;}
+				state = DEC;}
 			else if(PINA == 2){
 				state = DEC;}
 			else{
@@ -38,20 +38,17 @@ void tick(void){
 			state = WAIT_CHANGE;
 			break;
 		case WAIT_CHANGE:
-			if(last_state == 0){
-				if(PINA == 1 || PINA == 2){
-					state = START;
-				}
+			if(PINA == 3){
+				state = RESET;
 			}
-			else if(last_state == 1){
-				if(PINA == 0 || PINA == 2){
-					state = START;
-				}
+			else if(PINA == 0){
+				state = START;
 			}
-			else if(last_state == 2){
-				if(PINA == 0 || PINA == 1){
-					state = START;
-				}
+			else if(last_state == 1 && PINA == 2){
+				state = DEC;
+			}
+			else if(last_state == 2 && PINA == 1){
+				state = INC;
 			}
 			else{
 				state = WAIT_CHANGE;

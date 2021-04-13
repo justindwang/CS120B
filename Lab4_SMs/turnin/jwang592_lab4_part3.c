@@ -18,6 +18,7 @@ unsigned char Y = 0x00;
 unsigned char pound = 0x00;
 unsigned char tmpA7 = 0x00;
 unsigned char tmpB = 0x00;
+unsigned char already_pressed = 0x00;
 
 void tick(void){
 	X = PINA & 0x01;
@@ -32,7 +33,7 @@ void tick(void){
 		case LOCKED:
 			if(X || Y || tmpA7){
 				state = LOCKED;}
-			else if(pound){
+			else if(pound && !Y){
 				state = WAIT_Y;}
 			else{
 				state = LOCKED;}
@@ -40,14 +41,14 @@ void tick(void){
 		case WAIT_Y:
 			if(X || tmpA7){
 				state = LOCKED;}
-			else if(pound && Y){
+			else if(Y && pound){
 				state = LOCKED;}
-			else if(!pound && Y){
+			else if (!Y && pound){
+				state = WAIT_Y;}
+			else if(!Y && !pound){
+				state = WAIT_Y;}
+			else if(Y && !pound){
 				state = UNLOCKED;}
-			else if(pound && !Y){
-				state = WAIT_Y;}
-			else if(!pound && !Y){
-				state = WAIT_Y;}
 			else{
 				state = LOCKED;}
 			break;
