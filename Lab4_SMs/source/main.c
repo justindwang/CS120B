@@ -35,7 +35,14 @@ void tick(void){
 			state = WAIT_CHANGE;
 			break;
 		case RESET:
-			state = WAIT_CHANGE;
+            if(PINA == 1){
+                state = INC;
+            }
+            else if(PINA == 2){
+                state = DEC;
+            }
+            else{
+			    state = WAIT_CHANGE;}
 			break;
 		case WAIT_CHANGE:
 			if(PINA == 3){
