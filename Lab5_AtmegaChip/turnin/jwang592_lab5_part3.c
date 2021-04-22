@@ -1,9 +1,9 @@
-/*	Author: jwang592
+/*	Author: Justin Wang
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #  Exercise #
+ *	Assignment: Lab 5  Exercise 3
  *	Exercise Description: [optional - include for your own benefit]
- *
+ *  Demo Link: https://youtu.be/SXrHNIm5Bf8
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
