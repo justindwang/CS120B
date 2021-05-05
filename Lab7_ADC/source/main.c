@@ -1,7 +1,7 @@
 /*	Author: Justin Wang
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab 7  Exercise 1
+ *	Assignment: Lab 7  Exercise 4
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -20,15 +20,33 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
 	DDRD = 0xFF; PORTD = 0x00;
+	
+	//unsigned short MAX = 480;
+	unsigned short inc = 60;
+	unsigned char LED = 0x00;
 
 	ADC_init();
 
 	while(1){
+		LED = 0x00;
 		unsigned short x = ADC;
-		unsigned char tmpB = (char)x;
-		unsigned char tmpD = (char)(x >> 8);
-		PORTB = tmpB;
-		PORTD = tmpD;
+		if(x >= inc){
+			LED = LED | 0x01;}
+		if(x >= inc*2){
+			LED = LED | 0x02;}
+		if(x >= inc*3){
+			LED = LED | 0x04;}
+		if(x >= inc*4){
+			LED = LED | 0x08;}
+		if(x >= inc*5){
+			LED = LED | 0x10;}
+		if(x >= inc*6){
+			LED = LED | 0x20;}
+		if(x >= inc*7){
+			LED = LED | 0x40;}
+		if(x >= inc*8){
+			LED = LED | 0x80;}
+		PORTB = LED;
 	}
 
     return 1;
