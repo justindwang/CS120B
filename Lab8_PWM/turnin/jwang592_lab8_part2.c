@@ -38,7 +38,9 @@ void PWM_off() {
 
 #define tmpA (~PINA & 0x07)
 double array[8] = {261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25};
-enum states { off, on, hold1, hold2, note, inc, dec, wait1, wait2 } state;
+enum states { off, on, hold1, hold2 } state;
+enum states2 { note, inc, dec, wait1, wait2 } state2;
+unsigned char play;
 unsigned char count;
 
 void tick() {
@@ -50,7 +52,10 @@ void tick() {
 				state = off;}
 			break;
 		case on:
-			state = note;
+			if(tmpA == 0x01){
+				state = hold2;}
+			else{
+				state = on;}
 			break;
 		case hold1:
 			if (tmpA == 0x01) {
@@ -64,56 +69,65 @@ void tick() {
 			else {
 				state = off;}
 			break;
-		case note:
-			switch(tmpA) {
-				case 0x01:
-					state = hold2;
-					break;
-				case 0x02:
-					state = wait1;
-					break;
-				case 0x04:
-					state = wait2;
-					break;
-				default:
-					state = note;
-					break;
-			}
-			break;
-		case inc:
-			state = note;
-			break;
-		case dec:
-			state = note;
-			break;
-		case wait1:
-			if (tmpA == 0x02) {
-				state = wait1;}
-			else {
-				state = inc;}
-			break;
-		case wait2:
-			if (tmpA == 0x04) {
-				state = wait2;}
-			else {
-				state = dec;}
-			break;
 	}
 
 	switch(state) {
 		case off:
-			PWM_off();
+			play = 0;
 			break;
 		case on:
+			play = 1;
 			break;
 		case hold1:
-			PWM_on();
-			count = 0;
 			break;
 		case hold2:
 			break;
+	}
+}
+
+void tick2() {
+	switch(state2) {
 		case note:
-			set_PWM(array[count]);
+			switch(tmpA) {
+				case 0x01:
+					state2 = note;
+					break;
+				case 0x02:
+					state2 = wait1;
+					break;
+				case 0x04:
+					state2 = wait2;
+					break;
+				default:
+					state2 = note;
+					break;
+			}
+			break;
+		case inc:
+			state2 = note;
+			break;
+		case dec:
+			state2 = note;
+			break;
+		case wait1:
+			if (tmpA == 0x02) {
+				state2 = wait1;}
+			else {
+				state2 = inc;}
+			break;
+		case wait2:
+			if (tmpA == 0x04) {
+				state2 = wait2;}
+			else {
+				state2 = dec;}
+			break;
+	}
+	switch(state2) {
+		case note:
+			if(play == 1){
+				set_PWM(array[count]);}
+			else{
+				set_PWM(0);}
 			break;
 		case inc:
 			if (count < 7) { 
@@ -129,13 +143,15 @@ void tick() {
 			break;
 	}
 }
-
 int main(void) {
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
 	PWM_on();
 	state = off;
+	state2 = note;
+	count = 0;
 	while(1) {
 		tick();
+		tick2();
 	}
 }
