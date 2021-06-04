@@ -2,10 +2,12 @@
  *  Partner(s) Name: 
  *	Lab Section:
  *	Assignment: Lab 11
- *	Exercise Description: [optional - include for your own benefit]
+ *	Exercise Description: Tetris game adapted to work on 5x8 LED Matrix
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *  Demo Link: https://drive.google.com/file/d/10KGatgsSAAsfx5hCF0p_rSKYWJHirM27/view?usp=sharing
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -80,19 +82,22 @@ typedef struct task{
 	int (*TickFct)(int); 		//Task tick function
 } task;
 
-
+// Board representation
 unsigned char rows[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 unsigned char t_rows[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
+// Block Sequence
 unsigned char block_r1[30] = {0x10, 0x10, 0x18, 0x08, 0x18, 0x18, 0x10, 0x18, 0x08, 0x00, 0x08, 0x18, 0x10, 0x18, 0x18, 0x08, 0x10, 0x10, 0x18, 0x10, 0x18, 0x08, 0x10, 0x18, 0x18, 0x10, 0x10, 0x18, 0x10, 0x18};
 unsigned char block_r2[30] = {0x10, 0x18, 0x18, 0x10, 0x18, 0x18, 0x08, 0x10, 0x18, 0x18, 0x08, 0x18, 0x08, 0x10, 0x00, 0x10, 0x10, 0x10, 0x18, 0x18, 0x18, 0x08, 0x08, 0x18, 0x10, 0x18, 0x10, 0x18, 0x08, 0x18};
 
+// Tracking Values for current block
 unsigned char cb = 0;
 unsigned char cb_pos1 = 0x10;
 unsigned char cb_pos2 = 0x10;
 unsigned char cb_bot_pt = 1;
 unsigned char pt_val = 0;
 
+// Helper function for transposing 8x5 array to 5x8 array
 void transpose(){
     t_rows[0] = 0x00; t_rows[1] = 0x00; t_rows[2] = 0x00; t_rows[3] = 0x00; t_rows[4] = 0x00;
     t_rows[0] = ((rows[0]&0x01)<<7)|((rows[1]&0x01)<<6)|((rows[2]&0x01)<<5)|((rows[3]&0x01)<<4)|((rows[4]&0x01)<<3)|((rows[5]&0x01)<<2)|((rows[6]&0x01)<<1)|((rows[7]&0x01)<<0);
@@ -102,10 +107,12 @@ void transpose(){
     t_rows[4] = ((rows[0]&0x10)<<3)|((rows[1]&0x10)<<2)|((rows[2]&0x10)<<1)|((rows[3]&0x10)<<0)|((rows[4]&0x10)>>1)|((rows[5]&0x10)>>2)|((rows[6]&0x10)>>3)|((rows[7]&0x10)>>4);
 }
 
+// Assignment function for setting board values
 void set_rows(unsigned char* arr, unsigned char s0, unsigned char s1, unsigned char s2,unsigned char s3, unsigned char s4, unsigned char s5, unsigned char s6, unsigned char s7){
     arr[0] = s0; arr[1] = s1; arr[2] = s2; arr[3] = s3; arr[4] = s4; arr[5] = s5; arr[6] = s6; arr[7] = s7;
 } 
 
+// Helper function for erasing the image of a block in rows[]
 void remove_trail(){
     unsigned char t = rows[cb_bot_pt - 1];
     if((cb_pos1 & 0x10)&(t & 0x10)){
@@ -141,6 +148,7 @@ void remove_trail(){
     }
 }
 
+// Helper function that checks if the next iteration of gravity is cleared
 unsigned char bot_clear(){
     if(cb_bot_pt == 7){
         return 0x00;
@@ -156,6 +164,7 @@ unsigned char bot_clear(){
     }
 }
 
+// Helper function that checks if the game can continune
 unsigned char top_clear(){
     if(rows[1] & 0x18){
         return 0x00;
@@ -163,6 +172,7 @@ unsigned char top_clear(){
     return 0x01;
 }
 
+// Helper function that moves the current block to the left if allowed
 void shift_left(){
     if(cb_pos1 & 0x10 || cb_pos2 & 0x10){
         return;
@@ -188,6 +198,7 @@ void shift_left(){
     }
 }
 
+// Helper function that moves the current block to the right if allowed
 void shift_right(){
     if(cb_pos1 & 0x01 || cb_pos2 & 0x01){
         return;
@@ -212,6 +223,7 @@ void shift_right(){
     }
 }
 
+// Helper function that rotates the current block counterclockwise if allowed
 void flip_block(){
     remove_trail();
     unsigned char t_1 = 0x00;
@@ -264,6 +276,7 @@ void flip_block(){
     }
 }
 
+// Helper function that clears fully filled rows and performs gravity on remaining rows
 void clear_matched_rows(){
     if(rows[1] == 0x1F){
         set_rows(rows, 0x00, rows[0], rows[2], rows[3], rows[4], rows[5], rows[6], rows[7]);
@@ -295,6 +308,7 @@ void clear_matched_rows(){
     }
 }
 
+// State machine that performs one tick of gravity 
 enum temp_states {grav, prep_next, reset, wait_new_game};
 int tick_grav(int state){
     switch(state){
@@ -356,6 +370,8 @@ int tick_grav(int state){
 #define RIGHT (~PINA & 0x02)
 #define FLIP (~PINA & 0x01)
 
+
+// State machine that handles inputs from player
 enum input_states {wait, l_press, l_release, r_press, r_release, flip_press, flip_release};
 int input_tick(int state){
     switch(state){
@@ -411,6 +427,7 @@ int input_tick(int state){
     return state;
 }
 
+// State machine that outputs values to the LED matrix and score array
 enum disp_states {s0, s1, s2, s3, s4};
 int disp_tick(int state) {
 
@@ -472,6 +489,7 @@ int disp_tick(int state) {
 	return state;
 }
 
+// Main function with task scheduler
 int main(void) {
     /* Insert DDR and PORT initializations */
     DDRA = 0x00; PORTA = 0xFF;
